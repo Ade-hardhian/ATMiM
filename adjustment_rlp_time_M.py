@@ -4,10 +4,66 @@ import plotly.express as px
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 
-tab1, tab2, tab3 = st.tabs(["Replenishment Time Adjustment", "Terminal Analysis", "Cassette Capacity Analysis"])
+tab1, tab2, tab3, tab4 = st.tabs(["Replenishment Time Adjustment IDN", "Replenishment Time Adjustment MY", "Terminal Analysis", "Cassette Capacity Analysis"])
 # Tab 1 - Replenishment Time Adjustment
 with tab1:
-    st.text("Welcome to the Replenishment Time Adjustment Tool. Please upload the file you would like to adjust the replenishment time for.")
+    st.text("Welcome to the Replenishment Time Adjustment Tool IDN. Please upload the file you would like to adjust the replenishment time for.")
+
+    def analysis_DSA(uploaded_files):
+        output = []
+
+        for uploaded_file in uploaded_files:
+            # Read the file content as string
+            file_content = uploaded_file.getvalue().decode("utf-8")
+
+            # Split content into lines
+            all_lines = file_content.splitlines()
+            
+            # Search for the specific keyword in the lines
+            for i, line in enumerate(all_lines):
+                if "REPLACE CASH" in line:
+                    line_a = all_lines[i - 1]
+                    line_b = all_lines[i - 2]
+                    #id_polos = isi_file[line_a].split(" ")
+                    id_polos = line_a.split(" ")
+                    id = id_polos[11] if len(id_polos) > 11 else None
+
+                    #tanggal_polos = isi_file[line_b].split(" ")
+                    tanggal_polos = line_b.split(" ")
+                    ej_tanggal = tanggal_polos[0] if len(tanggal_polos) > 0 else None
+                    ej_waktu = tanggal_polos[3] if len(tanggal_polos) > 3 else None
+                    
+                    #print(id)
+                    #print(ej_tanggal)
+                    #print(ej_waktu)
+                
+                #text_box.insert(tk.END, f"File: {file}\n")
+                
+                    output.append([id, ej_tanggal, ej_waktu])
+
+        return output
+
+    # File uploader to upload multiple files
+    uploaded_files = st.file_uploader("Choose a file", accept_multiple_files=True, key="file_uploader_4")
+
+    st.header("Replenishment Time Adjustment IDN")
+    
+    # Start button to trigger the analysis
+    if st.button("START", key="start_button_4"):
+        if uploaded_files:
+            # Call the analysis function and display results
+            df3 = analysis_DSA(uploaded_files)
+            df_final = pd.DataFrame(df3)
+            df_final[0] = df_final[0].apply(lambda x: x.replace('\n', ''))
+            df_final[2] = df_final[2].apply(lambda x: x.replace('\n', ''))
+            df_final.rename(columns={0:'ID', 1:'Date', 2:'Adjustment time RPL'}, inplace=True)
+            #df_final['Adjustment time RPL'] = pd.to_datetime(df_final['Adjustment time RPL']).dt.strftime('%H:%M')
+            st.write(df_final)
+        else:
+            st.error("Please upload files to process.")
+
+with tab2:
+    st.text("Welcome to the Replenishment Time Adjustment Tool MY. Please upload the file you would like to adjust the replenishment time for.")
 
     def analysis_DSA(uploaded_files):
         output = []
@@ -42,7 +98,7 @@ with tab1:
     # File uploader to upload multiple files
     uploaded_files = st.file_uploader("Choose a file", accept_multiple_files=True, key="file_uploader_1")
 
-    st.header("Replenishment Time Adjustment")
+    st.header("Replenishment Time Adjustment MY")
     
     # Start button to trigger the analysis
     if st.button("START", key="start_button_1"):
@@ -57,7 +113,7 @@ with tab1:
             st.error("Please upload files to process.")
 
 # Tab 2 - Terminal Analysis
-with tab2:
+with tab3:
     st.text("Welcome to the terminal analysis Tool. Please upload the file you would like to analyze a terminal.")
     
     def analysis_terminal(uploaded_ejs):
@@ -320,7 +376,7 @@ with tab2:
             st.error("Please upload files to process.")
 
 #cassettes capacity analysis
-with tab3:
+with tab4:
     st.text("Welcome to the Cassette capacity analysis. Please upload the file you would like to cassette capacity.")
 
     def analysis_cassette(uploaded_cass):
