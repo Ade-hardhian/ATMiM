@@ -51,6 +51,7 @@ with tab1:
             df3 = analysis_DSA(uploaded_files)
             df_final = pd.DataFrame(df3)
             df_final.rename(columns={0:'ID', 1:'Date', 2:'Adjustment time RPL'}, inplace=True)
+            df_final['Adjustment time RPL'] = pd.to_datetime(df_final['Adjustment time RPL']).dt.strftime('%H:%M')
             st.write(df_final)
         else:
             st.error("Please upload files to process.")
